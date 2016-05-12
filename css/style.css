@@ -1,0 +1,99 @@
+
+body {
+	padding: 0;
+	margin: 0;
+}
+
+
+ul.segmented-control {
+	padding: 0;
+	margin: 0;
+	list-style: none;
+	display: table;
+	table-layout: fixed;
+	overflow: hidden;
+}
+ul.segmented-control > li {
+	display: table-cell;
+	text-align: center;
+	height: 100%;
+}
+ul.segmented-control > li > label {
+	display: table;
+	width: 100%;
+	height: 100%;
+}
+ul.segmented-control > li > label > .label {
+	display: table-cell;
+	width: 100%;
+	height: 100%;
+	vertical-align: middle;
+	cursor: pointer;
+}
+ul.segmented-control > li > label > input[type="radio"] {
+	display: none;
+}
+ul.segmented-control > li > label > input[type="radio"]:checked + .label {
+	background-color: red;
+}
+
+
+.search {
+	padding-left: 20px;
+	padding-right: 20px;
+}
+.search > .search-input {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.media-select > .media-type-list {
+	margin-left: auto;
+	margin-right: auto;
+	border: 1px solid black;
+	border-radius: 8px;
+}
+.media-select > .media-type-list > li > label > .label {
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+
+#media-search-bar {
+	height: 80px;
+	width: 100%;
+	background: #80bfff;
+	background: -webkit-linear-gradient(top, #cce6ff, #1a90ff);
+	background: -o-linear-gradient(bottom, #cce6ff, #1a90ff);
+	background: -moz-linear-gradient(bottom, #cce6ff, #1a90ff);
+}
+#media-search-bar > .search {
+	display: block;
+	overflow: hidden;
+	height: 100%;
+}
+#media-search-bar > .media-select {
+	display: block;
+	float: right;
+	width: 240px;
+	height: 100%;
+}
+#media-search-bar > .media-select > .media-type-list {
+	height: 40px;
+}
+@media only screen and (max-width: 480px) {
+	#media-search-bar {
+		height: auto;
+	}
+	#media-search-bar > .search {
+		display: block;
+		height: 40px;
+	}
+	#media-search-bar > .media-select {
+		display: block;
+		width: auto;
+		float: none;
+		height: 44px;
+	}
+}
+
