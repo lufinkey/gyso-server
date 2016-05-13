@@ -1,0 +1,8 @@
+#!/bin/bash
+hash=$(echo "$1" | grep -oP "(?<=btih:).*?(?=&|$)")
+echo "$hash"
+aria2c --bt-metadata-only=true --bt-save-metadata=true -q --dir="$2" "$1"
+if [ ! -a "$2/$hash.torrent" ]
+	exit(-1)
+fi
+exit(0)

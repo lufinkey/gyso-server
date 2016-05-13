@@ -1,0 +1,10 @@
+#!/bin/bash
+output=$(transmission-show $1 | sed -n -e '/FILES/,$p')
+while read -r line
+do
+	file=$(echo "$line" | sed -n -r "s/^\s*(.*)\s+\([0-9]+(\.[0-9]+)?\s+\w+\)$/\1/p")
+	if [ -n "$file" ]
+	then
+		echo "$file"
+	fi
+done <<< "$output"
