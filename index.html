@@ -10,33 +10,12 @@
 </head>
 <body>
 	<form id="media-search-bar" class="search-bar">
-		<div class="media-select">
-			<ul class="segmented-control media-type-list">
-				<li>
-					<label>
-						<input type="radio" name="mediatype" value="movie"/>
-						<span class="label">Movie</span>
-					</label>
-				</li>
-				<li>
-					<label>
-						<input type="radio" name="mediatype" value="tvshow"/>
-						<span class="label">TV Show</span>
-					</label>
-				</li>
-				<li>
-					<label>
-						<input type="radio" name="mediatype" value="album"/>
-						<span class="label">Album</span>
-					</label>
-				</li>
-				<li>
-					<label>
-						<input type="radio" name="mediatype" value="song"/>
-						<span class="label">Song</span>
-					</label>
-				</li>
-			</ul>
+		<div class="media-type">
+			<select name="mediatype">
+				<option value="movie">Movie</option>
+				<option value="tvshow">TV Show</option>
+				<option value="album">Album</option>
+			</select>
 		</div>
 		<div class="search">
 			<input class="search-input" type="text" name="query" placeholder="Search..."/>
