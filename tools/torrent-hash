@@ -1,4 +1,5 @@
 #!/bin/bash
 magnet=$(transmission-show -m $1)
-hash=$(echo "$magnet" | grep -oP "(?<=btih:).*?(?=&|$)")
+hash=$(echo "$magnet" | grep -oP "(?<=btih:)[a-fA-F0-9]*(?=&|$)")
+hash=${hash^^}
 echo $hash

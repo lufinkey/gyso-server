@@ -1,8 +1,21 @@
 #!/bin/bash
-hash=$(echo "$1" | grep -oP "(?<=btih:).*?(?=&|$)")
-echo "$hash"
-aria2c --bt-metadata-only=true --bt-save-metadata=true -q --dir="$2" "$1"
-if [ ! -a "$2/$hash.torrent" ]
-	exit(-1)
+hash=$(echo "$1" | grep -oP "(?<=btih:)[a-fA-F0-9]*(?=&|$)")
+if [ -z "$hash" ]
+then
+	exit -1
 fi
-exit(0)
+aria2c --bt-metadata-only=true --bt-save-metadata=true -q --dir="$2" "$1"
+upperhash=${hash^^}
+if [ -a "$2/$upperhash.torrent" ]
+then
+	echo "$upperhash"
+	exit 0
+fi
+lowerhash=${hash,,}
+if [ -a "$2/$lowerhash.torrent" ]
+then
+	mv "$2/$lowerhash.torrent" "$2/$upperhash.torrent"
+	echo "$upperhash"
+	exit 0
+fi
+exit -1
