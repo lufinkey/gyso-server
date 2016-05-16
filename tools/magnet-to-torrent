@@ -1,10 +1,80 @@
 #!/bin/bash
-hash=$(echo "$1" | grep -oP "(?<=btih:)[a-fA-F0-9]*(?=&|$)")
+#Only outputs hash if successful
+dir=""
+magnet=""
+timeout=60
+verbose=0
+loop_count=1
+noflag_count=0
+while [ $loop_count -le $# ]
+do
+	if [ "${!loop_count}" == "-v" ]
+	then
+		verbose=1
+	elif [ "${!loop_count}" == "-t" ]
+	then
+		((loop_count++))
+		if [ $loop_count -gt $# ]
+		then
+			# No argument after -t
+			if [ $verbose -eq 1 ]
+			then
+				echo "No argument specified for -t"
+			fi
+			exit -2
+		fi
+		timeout=${!loop_count}
+		if ! [[ $timeout =~ ^-?[0-9]+$ ]]
+		then
+			# timeout is not an integer
+			if [ $verbose -eq 1 ]
+			then
+				echo "-t argument must be an integer"
+			fi
+			exit -2
+		fi
+	else
+		if [ $noflag_count -eq 0 ]
+		then
+			magnet=${!loop_count}
+		elif [ $noflag_count -eq 1 ]
+		then
+			dir=${!loop_count}
+		else
+			# Too many arguments
+			if [ $verbose -eq 1 ]
+			then
+				echo "Unknown argument ${!loop_count}"
+			fi
+			exit -2
+		fi
+		((noflag_count++))
+	fi
+	((loop_count++))
+done
+if [ -z "$dir" ]
+then
+	if [ $verbose -eq 1 ]
+	then
+		echo "You must specify a directory"
+	fi
+	exit -2
+fi
+hash=$(echo "$magnet" | grep -oP "(?<=^magnet:\?xt=urn:(btih|sha1):)[a-zA-Z0-9]*(?=&|$)")
 if [ -z "$hash" ]
 then
-	exit -1
+	if [ $verbose -eq 1 ]
+	then
+		echo "Invalid magnet link"
+	fi
+	exit -2
 fi
-aria2c --bt-metadata-only=true --bt-save-metadata=true -q --dir="$2" "$1"
+if [ $verbose -eq 1 ]
+then
+	aria2c --bt-metadata-only=true --bt-save-metadata=true --bt-stop-timeout=$timeout --dir="$dir" "$magnet"
+else
+	aria2c --bt-metadata-only=true --bt-save-metadata=true -q --bt-stop-timeout=$timeout --dir="$dir" "$magnet"
+fi
 upperhash=${hash^^}
 if [ -a "$2/$upperhash.torrent" ]
 then
