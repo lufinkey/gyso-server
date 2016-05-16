@@ -1,54 +1,28 @@
 <?php
 
-$webroot = $_SERVER["DOCUMENT_ROOT"];
-require_once($webroot."/../config.php");
-mkdir("/tmp/".Config::$APP_NAME, 01777);
-if(!empty($_FILES["file"]))
+require_once("GFOSManager.php");
+
+if(isset($_FILES["file"]))
 {
-	$tmp_file_path = $_FILES["file"]["tmp_name"];
-	$mime_type = exec("file -b --mime-type ".escapeshellarg($tmp_file_path));
-	if($mime_type!="application/x-bittorrent")
+	if(isset($_FILES["file"]["error"]) && !empty($_FILES["file"]["error"]))
 	{
-		echo '{"success":false,"error":"File is not a valid torrent file"}';
+		echo json_encode(array("result" => false, "error"=>"upload error: ".$_FILES["file"]["error"]));
 		exit;
 	}
-	$hash = strtoupper(exec(escapeshellarg($webroot."/../tools/torrent-hash")." ".escapeshellarg($tmp_file_path)));
-	if(strlen($hash)==0)
-	{
-		echo '{"success":false,"error":"File is not a valid torrent file"}';
-		exit;
-	}
-	//TODO check if file is already downloading
-	mkdir("/tmp/".Config::$APP_NAME, 01777, true);
-	if(!move_uploaded_file($tmp_file_name, "/tmp/torrent-server/".$hash.".torrent"))
-	{
-		http_response_code(500);
-		echo '{"success":false,"error":"The server could not move the uploaded file"}';
-		exit;
-	}
+	$result = GFOSManager::organizeFile($_FILES["file"], true, $error);
+	echo json_encode(array("result" => $result, "error"=>$error));
+	exit;
 }
-else if(isset($_POST["url"]))
+else if(isset($_POST["url"]) && !empty($_POST["url"]))
 {
 	$url = $_POST["url"];
-	if(preg_match("/^(\w+)\:\\/\\/.*$/", $url, $matches)==1)
-	{
-		$protocol = $matches[0];
-		if($protocol=="http" || $protocol=="https")
-		{
-			//TODO attempt to download the torrent and add it to
-			//the /tmp/torrents-server directory
-		}
-		else
-		{
-			//TODO invalid url
-		}
-	}
-	//else if magnet link
-	else
-	{
-		//TODO invalid URL
-	}
+	$result = GFOSManager::organizeFromURL($url, $error);
+	echo json_encode(array("result" => $result, "error"=>$error));
+	exit;
 }
+
+echo json_encode(array("result" => false, "error" => "you must upload a file or send a url"));
+exit;
 
 //TODO get list of files in torrent
 //Attempt to identify files from media type
