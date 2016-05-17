@@ -1,13 +1,14 @@
 <?php
 
+require_once(__DIR__."/tools.php");
+
 class GFOSManager
 {
 	private static $mime_types = array();
 
 	public static $max_file_size = 524288000; //500 mb
 	public static $tmp_path = "/tmp/gfos-server";
-	public static $downloads_path = "~/Downloads/gfos-server";
-	public static $tools_path = "../../tools";
+	public static $downloads_path = "/var/lib/gfos-server";
 
 	private static &getMimeTypeInfo($mime_type)
 	{
@@ -22,58 +23,6 @@ class GFOSManager
 					"organize_prepare_handler" => null);
 		GFOSManager::$mime_types[$mime_type] = $mime_type_info;
 		return GFOSManager::$mime_types[$mime_type];
-	}
-
-	private static expand_tilde($path)
-	{
-		if(function_exists("posix_getuid") && strpos($path, '~')!==false)
-		{
-			$info = posix_getpwuid(posix_getuid());
-			$path = str_replace('~', $info["dir"], $path);
-		}
-		return $path;
-	}
-
-	private static str_startsWith($haystack, $needle)
-	{
-		if(strlen($needle)==0)
-		{
-			return true;
-		}
-		else if(strlen($haystack)>=strlen($needle))
-		{
-			if(substr($haystack,0,strlen($needle))==$needle)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private static fix_path($path_var)
-	{
-		$path_var = GFOSManager::expand_tilde($path_var);
-		if(GFOSManager::str_startsWith($path_var,'/'))
-		{
-			return $path_var;
-		}
-		else if($path_var=='.')
-		{
-			return __DIR__;
-		}
-		else if($path_var=='..')
-		{
-			return __DIR__."/..";
-		}
-		else if(GFOSManager::str_startsWith($path_var,"./"))
-		{
-			return __DIR__.substr($path_var,1,strlen($path_var)-1);
-		}
-		else if(GFOSManager::str_startsWith($path_var,"../"))
-		{
-			return __DIR__."/..".substr($path_var,2,strlen($path_var)-2);
-		}
-		return $path_var;
 	}
 
 	public static setMimeTypeFileSizeLimit($mime_type, $max_bytes)
@@ -176,8 +125,8 @@ class GFOSManager
 		{
 			$new_file_name = uniqid("", true);
 		}
-		$downloads_dir = GFOSManager::fix_path(self::$downloads_path).'/'.$mime_type_info["subdir"];
-		if(!mkdir($downloads_dir, 01777, true))
+		$downloads_dir = self::$downloads_path.'/'.$mime_type_info["subdir"];
+		if(!mkdir($downloads_dir, 0777, true))
 		{
 			$error = "failed to create downloads directory for mime-type";
 			return false;
@@ -247,8 +196,8 @@ class GFOSManager
 				
 				if($mime_type=="application/x-bittorrent")
 				{
-					$download_folder = GFOSManager::fix_path(self::$tmp_dir)."/downloads";
-					mkdir($download_folder, 01777, true);
+					$download_folder = self::$tmp_dir."/downloads";
+					mkdir($download_folder, 0777, true);
 					$tmp_file_path = tempnam($download_folder, "torrent_");
 					if(!$remote_file = fopen($url, 'rb'))
 					{
@@ -302,10 +251,9 @@ class GFOSManager
 		}
 		else if(preg_match("/^magnet:\?xt=urn:(btih|sha1):([a-zA-Z0-9])+.*$/", $url, $matches)==1)
 		{
-			$download_folder = GFOSManager::fix_path(self::$tmp_path)."/magnet-to-torrent";
+			$download_folder = self::$tmp_path."/magnet-to-torrent";
 			mkdir($download_folder, 01777, true);
-			$hash = exec(self::$tools_path."/magnet-to-torrent ".escapeshellarg($url)." ".escapeshellarg($download_folder)." -t 60");
-			if(strlen($hash)==0)
+			if(!magnet_to_torrent($url, $download_folder, $hash))
 			{
 				$error = "aria2c encountered an error while trying to download the torrent metadata";
 				return false;
@@ -333,8 +281,8 @@ class GFOSManager
 GFOSManager::setMimeTypeFileSizeLimit("application/x-bittorrent", 102400);
 GFOSManager::setMimeTypeSubdirectory("application/x-bittorrent", "torrents");
 GFOSManager::setMimeTypeFileCheckHandler("application/x-bittorrent", function($filepath, &$new_filename, &$error){
-	$hash = exec(escapeshellarg(GFOSManager::$tools_path."/torrent-hash").' '.escapeshellarg($tmp_file_path));
-	if(strlen($hash)==0)
+	$hash = torrent_hash($tmp_file_path);
+	if($hash==null)
 	{
 		$error = "file is not a valid torrent file";
 		return false;
@@ -342,7 +290,7 @@ GFOSManager::setMimeTypeFileCheckHandler("application/x-bittorrent", function($f
 	return true;
 });
 GFOSManager::setMimeTypeOrganizePrepareHandler("application/x-bittorrent", function($filepath, $media_info, &$organized_data, &$error){
-	$hash = exec(escapeshellarg(GFOSManager::$tools_path."/torrent-hash").' '.escapeshellarg($tmp_file_path));
+	$hash = torrent_hash($tmp_file_path);
 	//TODO organize based on media info
 });
 
