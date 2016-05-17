@@ -19,8 +19,7 @@ class GFOSManager
 					"disabled" => false,
 					"subdir" => str_replace('/', '_', $mime_type),
 					"filecheck_handler" => null,
-					"organize_prepare_handler" => null,
-					"organize_handler" => null);
+					"organize_prepare_handler" => null);
 		GFOSManager::$mime_types[$mime_type] = $mime_type_info;
 		return GFOSManager::$mime_types[$mime_type];
 	}
@@ -121,7 +120,7 @@ class GFOSManager
 		self::getMimeTypeInfo($mime_type)["filecheck_handler"] = $handler;
 	}
 
-	//handler signature: void($file_path, &$organized_data, &$error)
+	//handler signature: void($file_path, $media_info, &$organized_data, &$error)
 	public static setMimeTypeOrganizePrepareHandler($mime_type, $handler)
 	{
 		self::getMimeTypeInfo($mime_type)["organize_prepare_handler"] = $handler;
@@ -129,7 +128,7 @@ class GFOSManager
 
 	//takes an array from $_FILES, or one formatted in the same way.
 	//pass true to $uploaded_file if the file is from $_FILES
-	public static prepareFileForOrganizing($_file, $uploaded_file, &$organized_data, &$error)
+	public static prepareFileForOrganizing($_file, $uploaded_file, $media_info, &$organized_data, &$error)
 	{
 		$tmp_file_path = $_file["tmp_name"];
 		$mime_type = exec("file -b --mime-type ".escapeshellarg($tmp_file_path));
@@ -202,10 +201,10 @@ class GFOSManager
 		}
 		
 		$organize_prepare_handler = $mime_type_info["organize_prepare_handler"];
-		return $organize_prepare_handler($new_file_path, $organized_data, $error);
+		return $organize_prepare_handler($new_file_path, $media_info, $organized_data, $error);
 	}
 
-	public static prepareURLForOrganizing($url, &$organized_data, &$error)
+	public static prepareURLForOrganizing($url, $media_info, &$organized_data, &$error)
 	{
 		if(preg_match("/^(\w+)\:\\/\\/.*$/", $url, $matches)==1)
 		{
@@ -282,7 +281,7 @@ class GFOSManager
 							"type" => $mime_type,
 							"size" => $downloaded_bytes,
 							"tmp_name" => $tmp_file_path);
-					$result = self::prepareFileForOrganizing($_file, false, $organized_data, $error);
+					$result = self::prepareFileForOrganizing($_file, false, $media_info, $organized_data, $error);
 					if(!$result)
 					{
 						unlink($tmp_file_path);
@@ -316,7 +315,7 @@ class GFOSManager
 					"type" => $mime_type,
 					"size" => $downloaded_bytes,
 					"tmp_name" => $tmp_file_path);
-			$result = self::prepareFileForOrganizing($_file, false, $organized_data, $error);
+			$result = self::prepareFileForOrganizing($_file, false, $media_info, $organized_data, $error);
 			if(!$result)
 			{
 				unlink($tmp_file_path);
@@ -331,6 +330,8 @@ class GFOSManager
 	}
 }
 
+GFOSManager::setMimeTypeFileSizeLimit("application/x-bittorrent", 102400);
+GFOSManager::setMimeTypeSubdirectory("application/x-bittorrent", "torrents");
 GFOSManager::setMimeTypeFileCheckHandler("application/x-bittorrent", function($filepath, &$new_filename, &$error){
 	$hash = exec(escapeshellarg(GFOSManager::$tools_path."/torrent-hash").' '.escapeshellarg($tmp_file_path));
 	if(strlen($hash)==0)
@@ -339,6 +340,10 @@ GFOSManager::setMimeTypeFileCheckHandler("application/x-bittorrent", function($f
 		return false;
 	}
 	return true;
+});
+GFOSManager::setMimeTypeOrganizePrepareHandler("application/x-bittorrent", function($filepath, $media_info, &$organized_data, &$error){
+	$hash = exec(escapeshellarg(GFOSManager::$tools_path."/torrent-hash").' '.escapeshellarg($tmp_file_path));
+	//TODO organize based on media info
 });
 
 ?>

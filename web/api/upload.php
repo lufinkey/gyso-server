@@ -2,6 +2,16 @@
 
 require_once("GFOSManager.php");
 
+$media_info = null;
+if(!isset($_POST["media_info"]))
+{
+	$media_info = json_decode($_POST["media_info"], true);
+	if($media_info==null)
+	{
+		echo json_encode(array("result"=>false, "organized_data"=>array(), "error"=>"invalid media_info field"), JSON_FORCE_OBJECT);
+		exit;
+	}
+}
 $result = false;
 $error = "";
 $organized_data = array();
@@ -14,13 +24,13 @@ if(isset($_FILES["file"]))
 	}
 	else
 	{
-		$result = GFOSManager::prepareFileForOrganizing($_FILES["file"], true, $organized_data, $error);
+		$result = GFOSManager::prepareFileForOrganizing($_FILES["file"], true, $media_info, $organized_data, $error);
 	}
 }
 else if(isset($_POST["url"]) && !empty($_POST["url"]))
 {
 	$url = $_POST["url"];
-	$result = GFOSManager::prepareURLForOrganizing($url, $organized_data, $error);
+	$result = GFOSManager::prepareURLForOrganizing($url, $media_info, $organized_data, $error);
 }
 else
 {
