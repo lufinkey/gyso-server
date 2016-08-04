@@ -36,7 +36,16 @@ function torrent_contents($torrent_path)
 	$tools_path = getGFOSToolsPath();
 	$output = array();
 	exec(escapeshellarg($tools_path."/torrent-contents").' '.escapeshellarg($torrent_path), $output);
-	return $output;
+	$contents = array();
+	for($i=0; $i<count($output); $i++)
+	{
+		$matches = null;
+		if(preg_match("/^([0-9\\.]+) \\- (.*)$/", $output[$i], $matches)==1)
+		{
+			array_push($contents, array("name"=>$matches[2], "size"=>$matches[1]));
+		}
+	}
+	return $contents;
 }
 
 ?>

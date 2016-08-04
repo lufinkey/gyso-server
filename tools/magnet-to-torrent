@@ -1,5 +1,4 @@
 #!/bin/bash
-#Only outputs hash if successful
 dir=""
 magnet=""
 timeout=60

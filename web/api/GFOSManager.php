@@ -97,7 +97,7 @@ class GFOSManager
 			$error = "no handler set for mime-type";
 			return false;
 		}
-		
+
 		if($mime_type_info["max_size"]!=null)
 		{
 			if($_file["size"] > $mime_type_info["max_size"])
@@ -111,7 +111,7 @@ class GFOSManager
 			$error = "file exceeds max size";
 			return false;
 		}
-		
+
 		$new_file_name = "";
 		if($mime_type_info["filecheck_handler"]!=null)
 		{
@@ -148,7 +148,7 @@ class GFOSManager
 				return false;
 			}
 		}
-		
+
 		$organize_prepare_handler = $mime_type_info["organize_prepare_handler"];
 		return $organize_prepare_handler($new_file_path, $media_info, $organized_data, $error);
 	}
@@ -178,7 +178,7 @@ class GFOSManager
 					$error = "no handler set for mime-type";
 					return false;
 				}
-				
+
 				$max_bytes = 0;
 				if($mime_type_info["max_size"]!=null)
 				{
@@ -193,7 +193,7 @@ class GFOSManager
 					$error = "file exceeds max size";
 					return false;
 				}
-				
+
 				if($mime_type=="application/x-bittorrent")
 				{
 					$download_folder = self::$tmp_dir."/downloads";
