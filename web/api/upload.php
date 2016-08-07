@@ -1,6 +1,6 @@
 <?php
 
-require_once("GFOSManager.php");
+require_once("GYSOManager.php");
 
 $media_info = null;
 if(!isset($_POST["media_info"]))
@@ -24,13 +24,13 @@ if(isset($_FILES["file"]))
 	}
 	else
 	{
-		$result = GFOSManager::prepareFileForOrganizing($_FILES["file"], true, $media_info, $organized_data, $error);
+		$result = GYSOManager::prepareFileForOrganizing($_FILES["file"], true, $media_info, $organized_data, $error);
 	}
 }
 else if(isset($_POST["url"]) && !empty($_POST["url"]))
 {
 	$url = $_POST["url"];
-	$result = GFOSManager::prepareURLForOrganizing($url, $media_info, $organized_data, $error);
+	$result = GYSOManager::prepareURLForOrganizing($url, $media_info, $organized_data, $error);
 }
 else
 {

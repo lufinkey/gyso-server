@@ -2,7 +2,7 @@
 
 require_once(__DIR__."/tools.php");
 
-class GFOSManager
+class GYSOManager
 {
 	private static $mime_types = array();
 
@@ -12,17 +12,17 @@ class GFOSManager
 
 	private static &getMimeTypeInfo($mime_type)
 	{
-		if(isset(GFOSManager::$mime_types[$mime_type]))
+		if(isset(GYSOManager::$mime_types[$mime_type]))
 		{
-			return GFOSManager::$mime_types[$mime_type];
+			return GYSOManager::$mime_types[$mime_type];
 		}
 		$mime_type_info = array("max_size" => null,
 					"disabled" => false,
 					"subdir" => str_replace('/', '_', $mime_type),
 					"filecheck_handler" => null,
 					"organize_prepare_handler" => null);
-		GFOSManager::$mime_types[$mime_type] = $mime_type_info;
-		return GFOSManager::$mime_types[$mime_type];
+		GYSOManager::$mime_types[$mime_type] = $mime_type_info;
+		return GYSOManager::$mime_types[$mime_type];
 	}
 
 	public static setMimeTypeFileSizeLimit($mime_type, $max_bytes)
@@ -32,11 +32,11 @@ class GFOSManager
 
 	public static getMimeTypeFileSizeLimit($mime_type)
 	{
-		if(!isset(GFOSManager::$mime_type))
+		if(!isset(GYSOManager::$mime_type))
 		{
 			return $max_file_size;
 		}
-		$max_size = GFOSManager::$mime_types[$mime_type]["max_size"];
+		$max_size = GYSOManager::$mime_types[$mime_type]["max_size"];
 		if($max_size==null)
 		{
 			return $max_file_size;
@@ -51,11 +51,11 @@ class GFOSManager
 
 	public static getMimeTypeSubdirectory($mime_type)
 	{
-		if(!isset(GFOSManager::$mime_types[$mime_type]))
+		if(!isset(GYSOManager::$mime_types[$mime_type]))
 		{
 			return str_replace('/', '_', $mime_type);
 		}
-		return GFOSManager::$mime_types[$mime_type];
+		return GYSOManager::$mime_types[$mime_type];
 	}
 
 	public static setMimeTypeDisabled($mime_type, $disabled)
@@ -81,12 +81,12 @@ class GFOSManager
 	{
 		$tmp_file_path = $_file["tmp_name"];
 		$mime_type = exec("file -b --mime-type ".escapeshellarg($tmp_file_path));
-		if(!isset(GFOSManager::$mime_types[$mime_type]))
+		if(!isset(GYSOManager::$mime_types[$mime_type]))
 		{
 			$error = "unsupported mime-type";
 			return false;
 		}
-		$mime_type_info = GFOSManager::$mime_types[$mime_type];
+		$mime_type_info = GYSOManager::$mime_types[$mime_type];
 		if($mime_type_info["disabled"]==null)
 		{
 			$error = "mime-type has been explicitly disabled";
@@ -162,12 +162,12 @@ class GFOSManager
 			{
 				$head = array_change_key_case(get_headers($url, 1));
 				$mime_type = $head["content-type"];
-				if(!isset(GFOSManager::$mime_types[$mime_type]))
+				if(!isset(GYSOManager::$mime_types[$mime_type]))
 				{
 					$error = "unsupported mime-type";
 					return false;
 				}
-				$mime_type_info = GFOSManager::$mime_types[$mime_type];
+				$mime_type_info = GYSOManager::$mime_types[$mime_type];
 				if($mime_type_info["disabled"]==null)
 				{
 					$error = "mime-type has been explicitly disabled";
@@ -278,9 +278,9 @@ class GFOSManager
 	}
 }
 
-GFOSManager::setMimeTypeFileSizeLimit("application/x-bittorrent", 102400);
-GFOSManager::setMimeTypeSubdirectory("application/x-bittorrent", "torrents");
-GFOSManager::setMimeTypeFileCheckHandler("application/x-bittorrent", function($filepath, &$new_filename, &$error){
+GYSOManager::setMimeTypeFileSizeLimit("application/x-bittorrent", 102400);
+GYSOManager::setMimeTypeSubdirectory("application/x-bittorrent", "torrents");
+GYSOManager::setMimeTypeFileCheckHandler("application/x-bittorrent", function($filepath, &$new_filename, &$error){
 	$hash = torrent_hash($tmp_file_path);
 	if($hash==null)
 	{
@@ -289,7 +289,7 @@ GFOSManager::setMimeTypeFileCheckHandler("application/x-bittorrent", function($f
 	}
 	return true;
 });
-GFOSManager::setMimeTypeOrganizePrepareHandler("application/x-bittorrent", function($filepath, $media_info, &$organized_data, &$error){
+GYSOManager::setMimeTypeOrganizePrepareHandler("application/x-bittorrent", function($filepath, $media_info, &$organized_data, &$error){
 	$hash = torrent_hash($tmp_file_path);
 	//TODO organize based on media info
 });
