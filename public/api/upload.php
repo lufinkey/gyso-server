@@ -4,6 +4,23 @@ require __DIR__ . '/../../vendor/autoload.php';
 
 use lufinkey\GYSO;
 
+GYSO\Manager::setMimeTypeFileSizeLimit("application/x-bittorrent", 102400);
+GYSO\Manager::setMimeTypeSubdirectory("application/x-bittorrent", "torrents");
+GYSO\Manager::setMimeTypeFileCheckHandler("application/x-bittorrent", function ($file_path, &$new_filename, &$error) {
+    $hash = torrent_hash($file_path);
+    if ($hash == null) {
+        $error = "file is not a valid torrent file";
+        return false;
+    }
+    return true;
+});
+GYSO\Manager::setMimeTypeOrganizePrepareHandler("application/x-bittorrent",
+    function ($file_path, $media_info, &$organized_data, &$error) {
+        $hash = torrent_hash($file_path);
+        //TODO organize based on media info
+    });
+
+
 $media_info = null;
 if (!isset($_POST["media_info"])) {
     $media_info = json_decode($_POST["media_info"], true);
