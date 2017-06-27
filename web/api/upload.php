@@ -1,50 +1,42 @@
 <?php
 
-require_once("GYSOManager.php");
+require __DIR__ . '/../../vendor/autoload.php';
+
+use lufinkey\GYSO;
 
 $media_info = null;
-if(!isset($_POST["media_info"]))
-{
-	$media_info = json_decode($_POST["media_info"], true);
-	if($media_info==null)
-	{
-		echo json_encode(array("result"=>false, "organized_data"=>array(), "error"=>"invalid media_info field"), JSON_FORCE_OBJECT);
-		exit;
-	}
+if (!isset($_POST["media_info"])) {
+    $media_info = json_decode($_POST["media_info"], true);
+    if ($media_info == null) {
+        echo json_encode(array("result" => false, "organized_data" => array(), "error" => "invalid media_info field"),
+            JSON_FORCE_OBJECT);
+        exit;
+    }
 }
 $result = false;
 $error = "";
 $organized_data = array();
-if(isset($_FILES["file"]))
-{
-	if(isset($_FILES["file"]["error"]) && !empty($_FILES["file"]["error"]))
-	{
-		$result = false;
-		$error = "upload error: ".$_FILES["file"]["error"];
-	}
-	else
-	{
-		$result = Manager::prepareFileForOrganizing($_FILES["file"], true, $media_info, $organized_data, $error);
-	}
-}
-else if(isset($_POST["url"]) && !empty($_POST["url"]))
-{
-	$url = $_POST["url"];
-	$result = Manager::prepareURLForOrganizing($url, $media_info, $organized_data, $error);
-}
-else
-{
-	$result = false;
-	$error = "you must upload a file or send a URL";
+if (isset($_FILES["file"])) {
+    if (isset($_FILES["file"]["error"]) && !empty($_FILES["file"]["error"])) {
+        $result = false;
+        $error = "upload error: " . $_FILES["file"]["error"];
+    } else {
+        $result = GYSO\Manager::prepareFileForOrganizing($_FILES["file"], true, $media_info, $organized_data, $error);
+    }
+} else {
+    if (isset($_POST["url"]) && !empty($_POST["url"])) {
+        $url = $_POST["url"];
+        $result = GYSO\Manager::prepareURLForOrganizing($url, $media_info, $organized_data, $error);
+    } else {
+        $result = false;
+        $error = "you must upload a file or send a URL";
+    }
 }
 
-if($result)
-{
-	echo json_encode(array("result"=>$result, "organized_data"=>$organized_data, "error"=>$error));
-}
-else
-{
-	echo json_encode(array("result"=>$result, "organized_data"=>array(), "error"=>$error), JSON_FORCE_OBJECT);
+if ($result) {
+    echo json_encode(array("result" => $result, "organized_data" => $organized_data, "error" => $error));
+} else {
+    echo json_encode(array("result" => $result, "organized_data" => array(), "error" => $error), JSON_FORCE_OBJECT);
 }
 exit;
 
@@ -55,5 +47,3 @@ exit;
 //user can fix matches client-side and send them back, along with a confirmation
 // to begin torrenting
 //user can also fix matches at any point in time before torrent finishes downloading
-
-?>
