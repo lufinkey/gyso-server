@@ -24,13 +24,13 @@ if(isset($_FILES["file"]))
 	}
 	else
 	{
-		$result = GYSOManager::prepareFileForOrganizing($_FILES["file"], true, $media_info, $organized_data, $error);
+		$result = Manager::prepareFileForOrganizing($_FILES["file"], true, $media_info, $organized_data, $error);
 	}
 }
 else if(isset($_POST["url"]) && !empty($_POST["url"]))
 {
 	$url = $_POST["url"];
-	$result = GYSOManager::prepareURLForOrganizing($url, $media_info, $organized_data, $error);
+	$result = Manager::prepareURLForOrganizing($url, $media_info, $organized_data, $error);
 }
 else
 {
