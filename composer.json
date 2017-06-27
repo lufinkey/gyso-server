@@ -1,0 +1,12 @@
+{
+  "name": "lufinkey/gyso-server",
+  "description": "Get Your Shit Organized Server. Web server that tags and organizes uploaded music/tvshow/movie torrents or zip archives into a user-defined folder structure.",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "lufinkey\\GYSO\\": "src/"
+    }
+  }
+}
