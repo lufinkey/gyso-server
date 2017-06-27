@@ -33,19 +33,19 @@ class Manager
 
     public static function getMimeTypeFileSizeLimit($mime_type)
     {
-        if (!isset(self::$mime_type)) {
-            return $max_file_size;
+        if (!isset($mime_type)) {
+            return self::$max_file_size;
         }
         $max_size = self::$mime_types[$mime_type]["max_size"];
         if ($max_size == null) {
-            return $max_file_size;
+            return self::$max_file_size;
         }
         return $max_size;
     }
 
-    public static function setMimeTypeSubdirectory($mime_type, $subdir_name)
+    public static function setMimeTypeSubdirectory($mime_type, $sub_directory)
     {
-        self::getMimeTypeInfo($mime_type)["subdir"] = $subdir_name;
+        self::getMimeTypeInfo($mime_type)["subdir"] = $sub_directory;
     }
 
     public static function getMimeTypeSubdirectory($mime_type)
@@ -159,7 +159,6 @@ class Manager
                     }
                 }
 
-                $max_bytes = 0;
                 if ($mime_type_info["max_size"] != null) {
                     $max_bytes = $mime_type_info["max_size"];
                 } else {
@@ -171,7 +170,7 @@ class Manager
                 }
 
                 if ($mime_type == "application/x-bittorrent") {
-                    $download_folder = self::$tmp_dir . "/downloads";
+                    $download_folder = self::$tmp_path . "/downloads";
                     mkdir($download_folder, 0777, true);
                     $tmp_file_path = tempnam($download_folder, "torrent_");
                     if (!$remote_file = fopen($url, 'rb')) {
@@ -186,7 +185,7 @@ class Manager
                     while (!feof($remote_file)) {
                         $chunk = fread($remote_file, 6000);
                         $downloaded_bytes += strlen($chunk);
-                        if ($downloaded_bytes > $max_size) {
+                        if ($downloaded_bytes > $max_bytes) {
                             fclose($remote_file);
                             fclose($local_file);
                             unlink($tmp_file_path);
@@ -243,19 +242,3 @@ class Manager
         }
     }
 }
-
-Manager::setMimeTypeFileSizeLimit("application/x-bittorrent", 102400);
-Manager::setMimeTypeSubdirectory("application/x-bittorrent", "torrents");
-Manager::setMimeTypeFileCheckHandler("application/x-bittorrent", function ($filepath, &$new_filename, &$error) {
-    $hash = torrent_hash($tmp_file_path);
-    if ($hash == null) {
-        $error = "file is not a valid torrent file";
-        return false;
-    }
-    return true;
-});
-Manager::setMimeTypeOrganizePrepareHandler("application/x-bittorrent",
-    function ($filepath, $media_info, &$organized_data, &$error) {
-        $hash = torrent_hash($tmp_file_path);
-        //TODO organize based on media info
-    });
