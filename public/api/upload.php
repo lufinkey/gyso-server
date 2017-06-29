@@ -7,7 +7,7 @@ use lufinkey\GYSO;
 GYSO\Manager::setMimeTypeFileSizeLimit("application/x-bittorrent", 102400);
 GYSO\Manager::setMimeTypeSubdirectory("application/x-bittorrent", "torrents");
 GYSO\Manager::setMimeTypeFileCheckHandler("application/x-bittorrent", function ($file_path, &$new_filename, &$error) {
-    $hash = torrent_hash($file_path);
+    $hash = GYSO\Tools::torrent_hash($file_path);
     if ($hash == null) {
         $error = "file is not a valid torrent file";
         return false;
@@ -16,7 +16,7 @@ GYSO\Manager::setMimeTypeFileCheckHandler("application/x-bittorrent", function (
 });
 GYSO\Manager::setMimeTypeOrganizePrepareHandler("application/x-bittorrent",
     function ($file_path, $media_info, &$organized_data, &$error) {
-        $hash = torrent_hash($file_path);
+        $hash = GYSO\Tools::torrent_hash($file_path);
         //TODO organize based on media info
     });
 

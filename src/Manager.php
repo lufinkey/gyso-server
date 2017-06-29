@@ -219,7 +219,7 @@ class Manager
             if (preg_match("/^magnet:\?xt=urn:(btih|sha1):([a-zA-Z0-9])+.*$/", $url, $matches) == 1) {
                 $download_folder = self::$tmp_path . "/magnet-to-torrent";
                 mkdir($download_folder, 01777, true);
-                if (!magnet_to_torrent($url, $download_folder, $hash)) {
+                if (!Tools::magnet_to_torrent($url, $download_folder, $hash)) {
                     $error = "aria2c encountered an error while trying to download the torrent metadata";
                     return false;
                 }
