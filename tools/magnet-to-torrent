@@ -62,17 +62,17 @@ fi
 hash=$(echo "$magnet" | grep -oP "(?<=^magnet:\?xt=urn:(btih|sha1):)[a-zA-Z0-9]*(?=&|$)")
 if [ -z "$hash" ]
 then
-	if [ $verbose -eq 1 ]
+	if [ ${verbose} -eq 1 ]
 	then
 		echo "Invalid magnet link"
 	fi
 	exit -2
 fi
-if [ $verbose -eq 1 ]
+if [ ${verbose} -eq 1 ]
 then
-	aria2c --bt-metadata-only=true --bt-save-metadata=true --bt-stop-timeout=$timeout --dir="$dir" "$magnet"
+	aria2c --bt-metadata-only=true --bt-save-metadata=true --bt-stop-timeout=${timeout} --dir="$dir" "$magnet"
 else
-	aria2c --bt-metadata-only=true --bt-save-metadata=true -q --bt-stop-timeout=$timeout --dir="$dir" "$magnet"
+	aria2c --bt-metadata-only=true --bt-save-metadata=true -q --bt-stop-timeout=${timeout} --dir="$dir" "$magnet"
 fi
 upperhash=${hash^^}
 if [ -a "$2/$upperhash.torrent" ]
